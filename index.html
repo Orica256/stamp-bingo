@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#0a0a1a">
+  <title>スタンプBINGO | 学園祭</title>
+  <link rel="stylesheet" href="css/style.css">
+
+  <!-- OGP（シェア時の見た目） -->
+  <meta property="og:title" content="スタンプBINGO | 学園祭">
+  <meta property="og:description" content="NFCスタンプを集めてビンゴで景品ゲット！">
+  <meta property="og:type" content="website">
+</head>
+<body>
+
+<!-- ===== NFC読み取り後のリダイレクト中画面 ===== -->
+<div id="screen-redirect" class="screen">
+  <div class="redirect-icon" id="redirect-icon">📡</div>
+  <div class="redirect-title" id="redirect-title">スタンプ読み取り中...</div>
+  <div class="redirect-desc" id="redirect-desc">少々お待ちください</div>
+  <div class="redirect-spinner"></div>
+</div>
+
+<!-- ===== ウェルカム画面 ===== -->
+<div id="screen-top" class="screen active">
+  <div class="hero-emoji">🎪</div>
+  <div class="hero-title">スタンプ<br><span class="hl">BINGO</span></div>
+  <div class="hero-desc">学園祭スタンプラリー！<br>各スポットでスタンプを集めて<br>ビンゴを完成させよう🎯</div>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-text">📱 各スポットのNFCにiPhoneをかざす</div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-text">🟧 ビンゴカードにスタンプが押される</div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-text">🎉 ビンゴで受付に行って景品をゲット！</div>
+    </div>
+  </div>
+  <button class="btn-primary" onclick="goToBingo()">はじめる ✨</button>
+  <button class="btn-secondary" onclick="showAdmin()">🔐 スタッフ画面</button>
+</div>
+
+<!-- ===== ビンゴ画面 ===== -->
+<div id="screen-bingo" class="screen">
+  <header>
+    <div class="logo">STAMP<span>BINGO</span></div>
+    <div class="header-info">学園祭 2025<br>スタンプラリー</div>
+  </header>
+
+  <div class="bingo-header">
+    <div class="bingo-title">ビンゴカード</div>
+    <div class="bingo-subtitle">NFCにかざしてスタンプを集めよう！</div>
+  </div>
+
+  <div class="progress-bar-wrap">
+    <div class="progress-label">
+      <span>スタンプ獲得数</span>
+      <span id="stamp-count-label">0 / 9</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+    </div>
+  </div>
+
+  <!-- スタンプ取得時バナー -->
+  <div class="stamp-banner" id="stamp-banner">
+    <div class="stamp-banner-icon" id="banner-icon">🎉</div>
+    <div class="stamp-banner-text">
+      <div class="stamp-banner-title" id="banner-title"></div>
+      <div class="stamp-banner-sub" id="banner-sub"></div>
+    </div>
+  </div>
+
+  <div class="bingo-grid-wrap">
+    <div class="bingo-grid" id="bingo-grid"></div>
+  </div>
+
+  <div class="bingo-count-wrap">
+    <div class="bingo-badge">
+      🏆 ビンゴ数 <span class="count" id="bingo-count-badge">0</span>
+    </div>
+    <div class="bingo-badge" style="border-color:rgba(255,107,53,.3);color:var(--accent)">
+      ⭐ スタンプ <span class="count" id="stamp-count-badge">0</span>
+    </div>
+  </div>
+</div>
+
+<!-- ===== スタッフ管理画面 ===== -->
+<div id="screen-admin" class="screen">
+  <header>
+    <div class="logo">STAFF<span>管理</span></div>
+    <div class="header-info">🔐 スタッフ専用</div>
+  </header>
+
+  <div class="admin-section">
+    <div class="admin-section-title">統計</div>
+    <div class="stat-cards">
+      <div class="stat-card">
+        <div class="stat-num" id="stat-total-sessions">0</div>
+        <div class="stat-label">ビンゴ達成数</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" id="stat-total-bingo">0</div>
+        <div class="stat-label">景品コード発行数</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" id="stat-prizes-given">0</div>
+        <div class="stat-label">景品渡し済み</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" id="stat-prizes-pending">0</div>
+        <div class="stat-label">景品待ち</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="admin-section">
+    <div class="admin-section-title">景品コード確認</div>
+    <div class="code-input-row">
+      <input class="code-input" id="prize-code-input" type="text" maxlength="6" placeholder="XXXXXX" autocomplete="off">
+      <button class="btn-verify" onclick="verifyCode()">確認</button>
+    </div>
+    <div class="verify-result" id="verify-result"></div>
+  </div>
+
+  <div class="admin-section">
+    <div class="admin-section-title">NFCタグ設定用URL</div>
+    <p style="font-size:.77rem;color:var(--muted);margin-bottom:10px;line-height:1.6">
+      各スポットのNFCタグに書き込むURLです。<br>
+      「NFC Tools」アプリでタグに書き込んでください。
+    </p>
+    <div class="nfc-setup" id="nfc-setup"></div>
+  </div>
+
+  <div class="admin-section">
+    <div class="admin-section-title">景品交換ログ</div>
+    <div class="prize-log" id="prize-log">
+      <div style="color:var(--muted);font-size:.78rem;text-align:center;padding:10px">まだ記録がありません</div>
+    </div>
+  </div>
+
+  <div class="admin-section">
+    <div class="admin-section-title">データ管理</div>
+    <button class="btn-reset" onclick="resetAll()">🗑 全データリセット</button>
+  </div>
+</div>
+
+<!-- ===== ボトムナビ ===== -->
+<nav class="bottom-nav" id="bottom-nav">
+  <button class="nav-item active" id="nav-bingo" onclick="showScreen('bingo'); buildGrid(); renderGrid();">
+    <span class="nav-icon">🟧</span>ビンゴ
+  </button>
+  <button class="nav-item" id="nav-admin" onclick="showAdmin()">
+    <span class="nav-icon">🔐</span>スタッフ
+  </button>
+</nav>
+
+<!-- ===== ビンゴ達成ポップアップ ===== -->
+<div class="bingo-popup" id="bingo-popup">
+  <div class="confetti-wrap" id="confetti-wrap"></div>
+  <div class="popup-icon">🎉</div>
+  <div class="popup-title">BINGO!</div>
+  <div class="popup-desc">
+    ビンゴ達成おめでとう！<br>
+    受付でこのコードを見せてください🎁
+  </div>
+  <div class="popup-code" id="popup-prize-code">------</div>
+  <div class="popup-hint">📸 スクリーンショットを撮っておくと安心</div>
+  <button class="btn-primary" style="margin-top:6px" onclick="closeBingoPopup()">閉じる</button>
+</div>
+
+<!-- ===== トースト ===== -->
+<div class="toast" id="toast"></div>
+
+<script src="js/app.js"></script>
+</body>
+</html>
