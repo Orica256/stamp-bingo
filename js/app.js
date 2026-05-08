@@ -148,6 +148,8 @@ function renderGrid() {
   document.getElementById('progress-fill').style.width = `${(count / 9) * 100}%`;
   document.getElementById('stamp-count-badge').textContent = count;
   document.getElementById('bingo-count-badge').textContent = completedLines.length;
+
+  renderPrizeCodeButton();
 }
 
 function checkBingo() {
@@ -224,6 +226,53 @@ function triggerBingo() {
 
 function closeBingoPopup() {
   document.getElementById('bingo-popup').classList.remove('active');
+}
+
+// ビンゴ済みの場合、コード再表示ボタンをビンゴ画面に表示
+function renderPrizeCodeButton() {
+  const existing = document.getElementById('prize-code-btn-wrap');
+  if (existing) existing.remove();
+
+  if (!state.prizeCode) return;
+
+  const wrap = document.createElement('div');
+  wrap.id = 'prize-code-btn-wrap';
+  wrap.style.cssText = 'padding:0 18px 12px;';
+  wrap.innerHTML = `
+    <button onclick="triggerBingo()" style="
+      width:100%;
+      background:linear-gradient(135deg,rgba(255,215,0,.15),rgba(255,215,0,.05));
+      border:1.5px solid rgba(255,215,0,.5);
+      border-radius:12px;
+      padding:14px 16px;
+      color:#ffd700;
+      font-size:.9rem;
+      font-weight:700;
+      font-family:inherit;
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      letter-spacing:.03em;
+    ">
+      🎁 景品交換コードを表示
+      <span style="
+        background:rgba(255,215,0,.2);
+        border-radius:50px;
+        padding:2px 10px;
+        font-family:'Zen Dots',cursive;
+        font-size:.85rem;
+        letter-spacing:.1em;
+      ">${state.prizeCode}</span>
+    </button>
+  `;
+
+  // bingo-count-wrap の後に挿入
+  const anchor = document.getElementById('bingo-count-wrap') || document.querySelector('.bingo-grid-wrap');
+  if (anchor && anchor.parentNode) {
+    anchor.parentNode.insertBefore(wrap, anchor.nextSibling);
+  }
 }
 
 function launchConfetti() {
